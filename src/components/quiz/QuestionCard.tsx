@@ -1,7 +1,6 @@
 import { QuizQuestion } from "@/types/quiz";
 import { AnswerOption } from "./AnswerOption";
 import { ExplanationPanel } from "./ExplanationPanel";
-import { MathText } from "@/components/ui/MathText";
 import { motion, AnimatePresence } from "framer-motion";
 import { HelpCircle, Lightbulb } from "lucide-react";
 
@@ -50,15 +49,15 @@ export function QuestionCard({
         </span>
       </motion.div>
 
-      {/* Question text with math support */}
-      <motion.div
+      {/* Question text */}
+      <motion.h2
         className="text-xl md:text-2xl font-bold text-foreground mb-8 leading-relaxed"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <MathText text={question.question} as="div" />
-      </motion.div>
+        {question.question}
+      </motion.h2>
 
       {/* Hint for user */}
       {!isAnswered && (

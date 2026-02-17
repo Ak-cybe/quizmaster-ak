@@ -833,42 +833,4 @@
       border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
     }
   }
-
-  /* ============================================
-     MATH / KATEX RENDERING (Math Questions Support)
-     ============================================ */
-
-  /* Ensure KaTeX math integrates with quiz text */
-  .math-text-container .katex {
-    font-size: 1em;
-    line-height: inherit;
-  }
-
-  .math-text-container .katex-display {
-    margin: 0.75em 0;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0.5em 0;
-  }
-
-  .math-text-container .katex-display > .katex {
-    font-size: 1.1em;
-  }
-
-  /* Dark mode support for KaTeX */
-  .dark .math-text-container .katex {
-    color: hsl(var(--foreground));
-  }
-
-  /* Ensure math renders properly inside answer options */
-  .math-text-container .katex .mathnormal,
-  .math-text-container .katex .mathdefault {
-    font-style: italic;
-  }
-
-  /* Prevent math overflow in option buttons */
-  button .math-text-container .katex-display {
-    margin: 0.25em 0;
-    text-align: left;
-  }
 }

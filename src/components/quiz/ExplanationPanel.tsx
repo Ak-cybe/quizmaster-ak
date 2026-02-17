@@ -1,6 +1,5 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
-import { MathText } from "@/components/ui/MathText";
 import { Lightbulb, CheckCircle2, XCircle, BookOpen, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -84,9 +83,7 @@ export const ExplanationPanel = forwardRef<HTMLDivElement, ExplanationPanelProps
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">Explanation</p>
-            <div className="text-foreground leading-relaxed">
-              <MathText text={explanation} as="p" />
-            </div>
+            <p className="text-foreground leading-relaxed">{explanation}</p>
           </div>
         </motion.div>
 
