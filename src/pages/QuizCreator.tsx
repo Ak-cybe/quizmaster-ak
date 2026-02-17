@@ -28,23 +28,34 @@ export function QuizCreator({ onSaveQuiz, onClose }: QuizCreatorProps) {
     const questions: QuizQuestion[] = [];
 
     // Split by question patterns - handles multiple formats
-    // Format 1: Q1. or Q1: or Q1) or 1. or 1: or 1)
-    // Format 2: Question 1: or Question 1.
-    const questionBlocks = text.split(/(?=(?:Q?\d+[\.\:\)]\s*|Question\s*\d+[\.\:\s]))/gi).filter(block => block.trim());
+    // Matches: Q1. Q1: Q1) 1. 1: 1) Question 1: — at the start of a line
+    const questionBlocks = text
+      .split(/(?=^[ \t]*(?:Q?\d+[\.\:\)]|Question\s*\d+[\.\:\s]))/gim)
+      .filter((block) => block.trim());
 
-    for (let i = 0; i < questionBlocks.length; i++) {
-      const block = questionBlocks[i].trim();
+    for (let blockIdx = 0; blockIdx < questionBlocks.length; blockIdx++) {
+      const block = questionBlocks[blockIdx].trim();
       if (!block) continue;
 
       try {
-        // Extract question text (first line after number)
-        const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+        const lines = block
+          .split("\n")
+          .map((l) => l.trim())
+          .filter((l) => l);
         if (lines.length < 2) continue;
 
-        // Get question text - remove leading number/Q prefix
-        let questionText = lines[0].replace(/^(?:Q?\d+[\.\:\)]\s*|Question\s*\d+[\.\:\s])/i, '').trim();
+        // ── Extract question text ────────────────────────────
+        // Remove leading Q1. / 1) / Question 1: prefix
+        const questionText = lines[0]
+          .replace(
+            /^(?:\*{0,2})(?:Q?\d+[\.\:\)]\s*|Question\s*\d+[\.\:\s])(?:\*{0,2})\s*/i,
+            ""
+          )
+          .trim();
 
-        // Find options - look for A), A., A:, (A), a), etc.
+        if (!questionText) continue;
+
+        // ── Parse options & answer markers ────────────────────
         const options: { id: string; text: string }[] = [];
         let correctAnswer = "";
         let explanation = "";
@@ -52,50 +63,73 @@ export function QuizCreator({ onSaveQuiz, onClose }: QuizCreatorProps) {
         for (let j = 1; j < lines.length; j++) {
           const line = lines[j];
 
-          // Check for option pattern: A) B) C) D) or A. B. C. D. or (A) (B) etc.
-          const optionMatch = line.match(/^[\(\[]?([A-Da-d])[\)\]\.\:]\s*(.+)/);
+          // --- Check for option: A) / A. / A: / (A) / [A] / *A* etc. ---
+          const optionMatch = line.match(
+            /^(?:\*{0,2})[\(\[]?([A-Da-d])[\)\]\.:\-](?:\*{0,2})\s*(.+)/
+          );
           if (optionMatch) {
             const optionId = optionMatch[1].toUpperCase();
             let optionText = optionMatch[2].trim();
 
-            // Check if this option is marked as correct (has ✓, *, correct, √, or (correct))
-            const isCorrect = /[✓✔√\*]|[\(\[]?correct[\)\]]?/i.test(optionText);
-            if (isCorrect) {
+            // Check if marked correct with ✓ ✔ √ or explicit (correct) / [correct]
+            // ❌ Do NOT match lone * (used in markdown bold)
+            // ❌ Do NOT match the English word "correct" if it's part of the question content
+            const correctMarkerRegex =
+              /(?:^|\s)[✓✔√]|(?:^|\s)\(correct\)|\[correct\]/i;
+            const isMarkedCorrect = correctMarkerRegex.test(optionText);
+
+            if (isMarkedCorrect) {
               correctAnswer = optionId;
-              // Remove the correct marker from text
-              optionText = optionText.replace(/[✓✔√\*]|\s*[\(\[]?correct[\)\]]?\s*/gi, '').trim();
+              // Clean marker from option text
+              optionText = optionText
+                .replace(/[✓✔√]/g, "")
+                .replace(/\s*\(?correct\)?\s*/gi, "")
+                .replace(/\s*\[?correct\]?\s*/gi, "")
+                .trim();
             }
+
+            // Remove trailing ** markdown bold that wraps the entire option
+            optionText = optionText.replace(/^\*{1,2}|\*{1,2}$/g, "").trim();
 
             options.push({ id: optionId, text: optionText });
             continue;
           }
 
-          // Check for answer line: Answer: B, Correct: B, Ans: B, **Ans: C**, etc.
-          const answerMatch = line.match(/^[\*\s]*(?:Answer|Correct|Ans|Correct Answer|सही उत्तर|उत्तर)[\s\:\-]+([A-Da-d])[\*\s]*/i);
-          if (answerMatch) {
+          // --- Check for standalone answer line ---
+          // Handles: Answer: B, Ans: B, Ans. B, Correct: B, Correct Answer: B,
+          //          Answer - B, **Answer: B**, Answer: B) Delhi, ans:b,
+          //          सही उत्तर: B, उत्तर: C
+          const answerLineRegex =
+            /^[\s*]*(?:Answer|Correct\s*Answer|Correct|Ans|सही\s*उत्तर|उत्तर)[\s.\-:]+(?:[\(\[]?([A-Da-d])[\)\]]?)/i;
+          const answerMatch = line.match(answerLineRegex);
+          if (answerMatch && answerMatch[1]) {
             correctAnswer = answerMatch[1].toUpperCase();
             continue;
           }
 
-          // Check for explanation
-          const explanationMatch = line.match(/^(?:Explanation|Explain|Reason|Why|व्याख्या)[\s\:\-]+(.+)/i);
+          // --- Check for explanation ---
+          const explanationMatch = line.match(
+            /^(?:\*{0,2})(?:Explanation|Explain|Reason|Why|Note|व्याख्या)[\s.\-:]+(.+)/i
+          );
           if (explanationMatch) {
             explanation = explanationMatch[1].trim();
             // Collect remaining lines as part of explanation
             for (let k = j + 1; k < lines.length; k++) {
-              if (!lines[k].match(/^[\(\[]?[A-Da-d][\)\]\.\:]/)) {
-                explanation += " " + lines[k];
-              }
+              const nextLine = lines[k];
+              // Stop if we hit what looks like a new option or answer line
+              if (/^[\(\[]?[A-Da-d][\)\]\.:\-]\s/.test(nextLine)) break;
+              if (answerLineRegex.test(nextLine)) break;
+              explanation += " " + nextLine;
             }
             break;
           }
         }
 
-        // Validate we have enough data
+        // ── Validate & save ──────────────────────────────────
         if (questionText && options.length >= 2 && correctAnswer) {
-          // Ensure we have 4 options (pad if needed)
+          // Pad to 4 options if needed
           while (options.length < 4) {
-            const nextId = String.fromCharCode(65 + options.length); // A=65, B=66, etc.
+            const nextId = String.fromCharCode(65 + options.length);
             options.push({ id: nextId, text: "-" });
           }
 
