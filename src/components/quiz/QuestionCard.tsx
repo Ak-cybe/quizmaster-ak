@@ -1,6 +1,7 @@
 import { QuizQuestion } from "@/types/quiz";
 import { AnswerOption } from "./AnswerOption";
 import { ExplanationPanel } from "./ExplanationPanel";
+import { MathText } from "@/components/ui/MathText";
 import { motion, AnimatePresence } from "framer-motion";
 import { HelpCircle, Lightbulb } from "lucide-react";
 
@@ -24,14 +25,14 @@ export function QuestionCard({
   const isCorrect = selectedAnswer === question.correctAnswer;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
       className="relative"
     >
       {/* Question number badge */}
-      <motion.div 
+      <motion.div
         className="flex items-center gap-3 mb-6"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -49,19 +50,19 @@ export function QuestionCard({
         </span>
       </motion.div>
 
-      {/* Question text */}
-      <motion.h2 
+      {/* Question text with math support */}
+      <motion.div
         className="text-xl md:text-2xl font-bold text-foreground mb-8 leading-relaxed"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
       >
-        {question.question}
-      </motion.h2>
+        <MathText text={question.question} as="div" />
+      </motion.div>
 
       {/* Hint for user */}
       {!isAnswered && (
-        <motion.div 
+        <motion.div
           className="flex items-center gap-2 text-sm text-muted-foreground mb-6 p-3 rounded-lg bg-muted/50"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -89,8 +90,8 @@ export function QuestionCard({
                   ? option.id === question.correctAnswer
                     ? true
                     : selectedAnswer === option.id
-                    ? false
-                    : null
+                      ? false
+                      : null
                   : null
               }
               isDisabled={isAnswered}

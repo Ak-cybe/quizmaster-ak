@@ -3,6 +3,7 @@ import { QuizAttempt, QuizCategory, UserAnswer } from "@/types/quiz";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Confetti, StarConfetti } from "@/components/effects/Confetti";
+import { MathText } from "@/components/ui/MathText";
 import { Trophy, Clock, Target, RotateCcw, Home, ChevronDown, ChevronUp, Check, X, Star, Sparkles, Zap, Award, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -326,7 +327,7 @@ export function QuizResults({ category, attempt, onRetry, onGoHome }: QuizResult
                         {isCorrect ? <Check className="h-5 w-5" /> : <X className="h-5 w-5" />}
                       </motion.div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate text-foreground">Q{index + 1}: {question.question}</p>
+                        <p className="font-medium truncate text-foreground">Q{index + 1}: <MathText text={question.question} /></p>
                         <p className="text-sm text-muted-foreground flex items-center gap-2">
                           <Clock className="h-3 w-3" />
                           {userAnswer?.timeTaken || 0}s
@@ -359,7 +360,7 @@ export function QuizResults({ category, attempt, onRetry, onGoHome }: QuizResult
                                 )}
                               >
                                 {userAnswer?.selectedAnswer
-                                  ? question.options.find((o) => o.id === userAnswer.selectedAnswer)?.text
+                                  ? <MathText text={question.options.find((o) => o.id === userAnswer.selectedAnswer)?.text || "No answer"} />
                                   : "No answer"}
                               </span>
                             </p>
@@ -367,12 +368,12 @@ export function QuizResults({ category, attempt, onRetry, onGoHome }: QuizResult
                               <p className="text-sm text-muted-foreground mb-3">
                                 Correct answer:{" "}
                                 <span className="font-semibold text-success">
-                                  {question.options.find((o) => o.id === question.correctAnswer)?.text}
+                                  <MathText text={question.options.find((o) => o.id === question.correctAnswer)?.text || ""} />
                                 </span>
                               </p>
                             )}
                             <div className="p-3 rounded-lg bg-background/50 border border-border/50">
-                              <p className="text-sm text-foreground/80">{question.explanation}</p>
+                              <p className="text-sm text-foreground/80"><MathText text={question.explanation} /></p>
                             </div>
                           </div>
                         </motion.div>

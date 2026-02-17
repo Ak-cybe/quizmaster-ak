@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { QuizOption } from "@/types/quiz";
+import { MathText } from "@/components/ui/MathText";
 import { Check, X, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -134,7 +135,7 @@ export function AnswerOption({
           !isDisabled && "group-hover:translate-x-1"
         )}
       >
-        {option.text}
+        <MathText text={option.text} />
       </span>
 
       {/* Success sparkle effect */}

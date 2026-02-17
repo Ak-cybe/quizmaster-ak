@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import { MathText } from "@/components/ui/MathText";
 import { Lightbulb, CheckCircle2, XCircle, BookOpen, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -28,9 +29,9 @@ export const ExplanationPanel = forwardRef<HTMLDivElement, ExplanationPanelProps
           "absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-20",
           isCorrect ? "bg-success" : "bg-destructive"
         )} />
-        
+
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="flex items-center gap-3 mb-4"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -39,8 +40,8 @@ export const ExplanationPanel = forwardRef<HTMLDivElement, ExplanationPanelProps
           <motion.div
             className={cn(
               "p-3 rounded-xl shadow-lg",
-              isCorrect 
-                ? "bg-success" 
+              isCorrect
+                ? "bg-success"
                 : "bg-destructive"
             )}
             initial={{ scale: 0, rotate: -180 }}
@@ -83,7 +84,9 @@ export const ExplanationPanel = forwardRef<HTMLDivElement, ExplanationPanelProps
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground mb-1">Explanation</p>
-            <p className="text-foreground leading-relaxed">{explanation}</p>
+            <div className="text-foreground leading-relaxed">
+              <MathText text={explanation} as="p" />
+            </div>
           </div>
         </motion.div>
 
@@ -99,8 +102,8 @@ export const ExplanationPanel = forwardRef<HTMLDivElement, ExplanationPanelProps
             isCorrect ? "text-warning" : "text-primary"
           )} />
           <span className="text-muted-foreground">
-            {isCorrect 
-              ? "Keep up the great work! You're doing amazing." 
+            {isCorrect
+              ? "Keep up the great work! You're doing amazing."
               : "Every mistake is a step toward mastery. Keep going!"}
           </span>
           <ArrowRight className="h-3 w-3 text-muted-foreground" />

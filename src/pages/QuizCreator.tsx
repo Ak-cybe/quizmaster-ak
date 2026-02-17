@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Save, BookOpen, FileText, AlertCircle, CheckCircle2, Bot, Sparkles, ExternalLink } from "lucide-react";
 import { QuizCategory, QuizQuestion } from "@/types/quiz";
+import { MathText } from "@/components/ui/MathText";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -322,6 +323,9 @@ Answer: B`;
               <AlertDescription id="format-instructions">
                 <strong>Supported formats:</strong> Number your questions (1. or Q1.), add options (A, B, C, D),
                 mark correct answer with ✓ or (correct) or write "Answer: B" on separate line.
+                <br />
+                <strong>✨ Math support:</strong> Use LaTeX notation like <code>{"$\\sqrt{16}$"}</code>, <code>{"$x^2$"}</code>, <code>{"$\\frac{a}{b}$"}</code> for math expressions.
+                Unicode symbols (√, ², ³, π, etc.) also work!
               </AlertDescription>
             </Alert>
 
@@ -364,7 +368,7 @@ Answer: B`;
                   {parsedQuestions.slice(0, 5).map((q, idx) => (
                     <div key={idx} className="text-sm border-b border-border/50 pb-2">
                       <p className="font-medium text-foreground">
-                        {idx + 1}. {q.question}
+                        {idx + 1}. <MathText text={q.question} />
                       </p>
                       <p className="text-muted-foreground">
                         Options: {q.options.map(o => o.id).join(", ")} |
